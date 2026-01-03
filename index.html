@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lavalink Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    :root {
+        --bg-dark: #0a0e17;
+        --bg-card: #151b2b;
+        --accent-cyan: #00d9ff;
+        --accent-purple: #a855f7;
+        --accent-green: #10b981;
+        --accent-red: #ef4444;
+        --text-primary: #e2e8f0;
+        --text-secondary: #94a3b8;
+        --border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+        font-family: 'Space Mono', monospace;
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    /* Animated background grid */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+        z-index: 0;
+        animation: gridScroll 20s linear infinite;
+    }
+
+    @keyframes gridScroll {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(50px, 50px); }
+    }
+
+    /* Glowing orbs */
+    .orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.15;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: var(--accent-cyan);
+        top: -200px;
+        right: -200px;
+        animation: float 15s ease-in-out infinite;
+    }
+
+    .orb-2 {
+        width: 300px;
+        height: 300px;
+        background: var(--accent-purple);
+        bottom: -150px;
+        left: -150px;
+        animation: float 20s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(30px, 30px) scale(1.1); }
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    h1 {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        letter-spacing: -2px;
+    }
+
+    .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        animation: fadeIn 0.6s ease-out backwards;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+    .card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .card:hover {
+        border-color: rgba(0, 217, 255, 0.3);
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 217, 255, 0.1);
+    }
+
+    .card-title {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        position: relative;
+    }
+
+    .status-dot.online {
+        background: var(--accent-green);
+        box-shadow: 0 0 10px var(--accent-green);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-dot.offline {
+        background: var(--accent-red);
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .server-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+    }
+
+    .info-value {
+        color: var(--accent-cyan);
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 1rem;
+        border: none;
+        border-radius: 12px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--accent-cyan);
+        color: var(--accent-cyan);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-box {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid var(--border);
+    }
+
+    .stat-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--accent-cyan);
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .config-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 2rem;
+        animation: fadeIn 0.6s ease-out 0.5s backwards;
+    }
+
+    .config-title {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--accent-cyan);
+    }
+
+    .input-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .input-group input:focus {
+        outline: none;
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+    }
+
+    .code-block {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+
+    .code-block code {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        color: var(--accent-cyan);
+        line-height: 1.6;
+    }
+
+    .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(0, 217, 255, 0.1);
+        border: 1px solid var(--accent-cyan);
+        border-radius: 8px;
+        color: var(--accent-cyan);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+        background: var(--accent-cyan);
+        color: var(--bg-dark);
+    }
+
+    .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--accent-green);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        color: var(--accent-green);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+```
+<div class="container">
+    <header>
+        <h1>LAVALINK</h1>
+        <p class="subtitle">Dashboard de contrôle</p>
+    </header>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <h3 class="card-title">Statut du serveur</h3>
+            <div class="status-indicator">
+                <div class="status-dot online" id="statusDot"></div>
+                <span id="statusText">En ligne</span>
+            </div>
+            <div class="server-info">
+                <div class="info-row">
+                    <span class="info-label">Uptime</span>
+                    <span class="info-value" id="uptime">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Version</span>
+                    <span class="info-value">4.0.8</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Statistiques</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-value" id="playersCount">0</span>
+                    <span class="stat-label">Lecteurs actifs</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-value" id="memoryUsage">--</span>
+                    <span class="stat-label">Mémoire</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Actions rapides</h3>
+            <button class="btn btn-primary" onclick="testConnection()">
+                <span>🔍 Tester la connexion</span>
+            </button>
+            <button class="btn btn-secondary" onclick="refreshStats()" style="margin-top: 1rem;">
+                <span>🔄 Rafraîchir les stats</span>
+            </button>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Liens utiles</h3>
+            <a href="https://github.com/lavalink-devs/Lavalink" target="_blank" style="text-decoration: none;">
+                <button class="btn btn-secondary">
+                    <span>📚 Documentation</span>
+                </button>
+            </a>
+            <a href="https://render.com" target="_blank" style="text-decoration: none;">
+                <button class="btn btn-secondary" style="margin-top: 1rem;">
+                    <span>☁️ Render Dashboard</span>
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <div class="config-section">
+        <h2 class="config-title">Configuration de connexion</h2>
+        
+        <div class="input-group">
+            <label for="serverUrl">URL du serveur</label>
+            <input type="text" id="serverUrl" placeholder="https://votre-lavalink.onrender.com" value="">
+        </div>
+
+        <div class="input-group">
+            <label for="serverPassword">Mot de passe</label>
+            <input type="password" id="serverPassword" placeholder="Votre mot de passe" value="ChangeMotDePasseIci123">
+        </div>
+
+        <button class="btn btn-primary" onclick="saveConfig()">
+            <span>💾 Sauvegarder la configuration</span>
+        </button>
+
+        <div style="margin-top: 2rem;">
+            <h3 style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 1rem;">Code pour votre bot Discord</h3>
+            <div class="code-block">
+```
+
+<code>{
+host: “<span id="codeHost">votre-lavalink.onrender.com</span>”,
+port: 443,
+password: “<span id="codePassword">ChangeMotDePasseIci123</span>”,
+secure: true
+}</code>
+</div>
+<button class="copy-btn" onclick="copyCode()">
+📋 Copier le code
+</button>
+</div>
+</div>
+</div>
+
+```
+<div class="toast" id="toast">Configuration sauvegardée !</div>
+
+<script>
+    // Configuration
+    let config = {
+        url: localStorage.getItem('lavalink_url') || '',
+        password: localStorage.getItem('lavalink_password') || 'ChangeMotDePasseIci123'
+    };
+
+    // Charger la config au démarrage
+    document.getElementById('serverUrl').value = config.url;
+    document.getElementById('serverPassword').value = config.password;
+    updateCodeBlock();
+
+    // Fonction pour sauvegarder la configuration
+    function saveConfig() {
+        const url = document.getElementById('serverUrl').value;
+        const password = document.getElementById('serverPassword').value;
+        
+        localStorage.setItem('lavalink_url', url);
+        localStorage.setItem('lavalink_password', password);
+        
+        config.url = url;
+        config.password = password;
+        
+        updateCodeBlock();
+        showToast('Configuration sauvegardée !');
+    }
+
+    // Mettre à jour le bloc de code
+    function updateCodeBlock() {
+        const host = config.url.replace('https://', '').replace('http://', '');
+        document.getElementById('codeHost').textContent = host || 'votre-lavalink.onrender.com';
+        document.getElementById('codePassword').textContent = config.password;
+    }
+
+    // Tester la connexion au serveur
+    async function testConnection() {
+        if (!config.url) {
+            showToast('❌ Veuillez d\'abord configurer l\'URL du serveur', 'error');
+            return;
+        }
+
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span>⏳ Connexion en cours...</span>';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`${config.url}/version`, {
+                headers: {
+                    'Authorization': config.password
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.text();
+                document.getElementById('statusDot').className = 'status-dot online';
+                document.getElementById('statusText').textContent = 'En ligne';
+                showToast('✅ Serveur accessible !');
+                refreshStats();
+            } else {
+                throw new Error('Serveur non accessible');
+            }
+        } catch (error) {
+            document.getElementById('statusDot').className = 'status-dot offline';
+            document.getElementById('statusText').textContent = 'Hors ligne';
+            showToast('❌ Impossible de se connecter au serveur', 'error');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // Rafraîchir les statistiques
+    async function refreshStats() {
+        if (!config.url) return;
+
+        try {
+            const response = await fetch(`${config.url}/stats`, {
+                headers: {
+                    'Authorization': config.password
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Mettre à jour l'uptime
+                const uptimeSeconds = Math.floor(data.uptime / 1000);
+                const hours = Math.floor(uptimeSeconds / 3600);
+                const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+                document.getElementById('uptime').textContent = `${hours}h ${minutes}m`;
+                
+                // Mettre à jour les statistiques
+                document.getElementById('playersCount').textContent = data.players || 0;
+                
+                // Mémoire utilisée
+                const memoryMB = Math.floor(data.memory.used / 1024 / 1024);
+                document.getElementById('memoryUsage').textContent = `${memoryMB}MB`;
+            }
+        } catch (error) {
+            console.error('Erreur lors du rafraîchissement des stats:', error);
+        }
+    }
+
+    // Copier le code
+    function copyCode() {
+        const host = document.getElementById('codeHost').textContent;
+        const password = document.getElementById('codePassword').textContent;
+        
+        const code = `{
+```
+
+host: “${host}”,
+port: 443,
+password: “${password}”,
+secure: true
+}`;
+
+```
+        navigator.clipboard.writeText(code).then(() => {
+            showToast('📋 Code copié dans le presse-papier !');
+        });
+    }
+
+    // Afficher un toast
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        
+        if (type === 'error') {
+            toast.style.borderColor = 'var(--accent-red)';
+            toast.style.color = 'var(--accent-red)';
+        } else {
+            toast.style.borderColor = 'var(--accent-green)';
+            toast.style.color = 'var(--accent-green)';
+        }
+        
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // Rafraîchir les stats toutes les 30 secondes si configuré
+    setInterval(() => {
+        if (config.url) {
+            refreshStats();
+        }
+    }, 30000);
+
+    // Uptime simulé si pas de connexion
+    let startTime = Date.now();
+    setInterval(() => {
+        if (!config.url || document.getElementById('statusDot').classList.contains('offline')) {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            document.getElementById('uptime').textContent = `${hours}h ${minutes}m`;
+        }
+    }, 1000);
+</script>
+```
+
+</body>
+</html>
